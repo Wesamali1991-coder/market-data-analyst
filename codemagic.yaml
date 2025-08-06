@@ -1,9 +1,6 @@
 workflows:
   flutter_release:
     name: Build iOS IPA (Release)
-    triggers:
-      - event: push
-        branch: main
     environment:
       flutter: stable
       xcode: latest
