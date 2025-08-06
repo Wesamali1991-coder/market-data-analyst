@@ -1,0 +1,35 @@
+workflows:
+  flutter_release:
+    name: Build iOS IPA (Release)
+    triggering:
+      events:
+        - push
+      branches:
+        - main
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      - name: Fetch dependencies
+        script: |
+          flutter pub get
+      - name: Build iOS (no codesign)
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Archive with Xcode
+        script: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            archive \
+            -archivePath "$CM_BUILD_DIR/Runner.xcarchive"
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath "$CM_BUILD_DIR/Runner.xcarchive" \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath "$CM_BUILD_DIR/output"
+    artifacts:
+      - build/ios/ipa/*.ipa
